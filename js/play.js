@@ -16,7 +16,7 @@ function playOne() {
         return;
     var note = NOTES[IDX];
     playNote(note);
-    setTimeout(playOne, 1000)
+    setTimeout(playOne, 500)
 }
 
 function run() {
@@ -24,5 +24,9 @@ function run() {
     running = true;
     numNotesPlayed = 0;
     playOne();
+}
+
+function stop() {
+    running = false;
 }
 

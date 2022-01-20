@@ -126,11 +126,14 @@
   </style>
 
 <script src="js/soundplay.js"></script>
-<script src="js/randplay.js"></script>
+<script src="js/play.js"></script>
 </head>
 
 <body>
   <div id="base">
+    <button onclick="run()">Run</button> &nbsp;&nbsp;
+    <button onclick="stop()">Stop</button>
+
     <a href="http://www.g200kg.com/" target="_blank"><img id="logo" src="./js/libs/tinysynth/g200kg160x80.png"
         style="float:left;margin:0px 20px 0px 0px"></a>
     <h1>WebAudio-TinySynth</h1>
@@ -536,7 +539,6 @@
     <li class="webaudioctrl-context-menu__item" onclick="webAudioControlsWidgetManager.contextMenuClear()">Clear</li>
     <li class="webaudioctrl-context-menu__item" onclick="webAudioControlsWidgetManager.contextMenuClose()">Close</li>
   </ul>
-
 
 </body>
 
