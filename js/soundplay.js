@@ -33,6 +33,10 @@ function dumpSong(synth) {
     }
 }
 
+function playNote(note) {
+    synth.send([0x90+0, note, 100], 0);
+}
+
 function Init() {
     InitMidi();
     synth = document.getElementById("tinysynth");
