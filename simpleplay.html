@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<script src="./js/libs/tinysynth/webaudio-tinysynth.js"></script>
+<script src="js/TinySynth.js"></script>
+<script src="js/play.js"></script>
+<script>
+    function playNote(n) {
+        ts.synth.noteOn(0, n, 50, 0);
+    }
+    var ts = new TinySynth();
+    //var ts = synth;
+    window.onload = () => ts.Init();
+</script>
+</head>
+
+<body>
+    <div id="status" hidden></div>
+    <div id="options"></div>
+
+    <button onclick="run()">Run</button> &nbsp;&nbsp;
+    <button onclick="stop()">Stop</button>
+    <select id="prog" onchange="ts.SetProgram(this.selectedIndex)"></select>
+</body>
+
+</html>
