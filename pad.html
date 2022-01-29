@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <style>
+        #musicCanvas {
+            width: 100%;
+            xheight: 93%;
+            background: #f1dcba;
+        }
+    </style>
+    <script src="./js/libs/tinysynth/webaudio-tinysynth.js"></script>
+    <script src="js/libs/jquery-3.1.0.min.js"></script>
+    <script src="js/TinySynth.js"></script>
+    <script src="js/play.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/libs/sprintf.js"></script>
+    <script src="js/CanvasTool.js"></script>
+    <script src="js/MusicTool.js"></script>
+    <script src="js/PianoBox.js"></script>
+    <script>
+        function playNote(n) {
+            ts.synth.noteOn(0, n, 50, 0);
+        }
+        var ts = new TinySynth();
+        var mtool;
+        //var ts = synth;
+        window.onload = () => {
+            ts.Init();
+            mtool = new MusicTool("musicCanvas");
+            mtool.start();
+            mtool.setView(0, 0, 1020);
+            //window.wheel = gtool.addWheel(SIMPLE1);
+            //window.game = mtool.addGame({ songs: SONGS, initialSong: SIMPLE1 });
+            // window.GAME = window.game;
+
+        }
+    </script>
+</head>
+
+<body>
+    <div id="status" hidden></div>
+    <div id="options"></div>
+
+    <button onclick="run()">Run</button> &nbsp;&nbsp;
+    <button onclick="stop()">Stop</button>
+    <select id="prog" onchange="ts.SetProgram(this.selectedIndex)"></select>
+    <div>xxx</div>
+    <canvas id="musicCanvas"></canvas>
+    <span id="canvasStat"></span>
+</body>
+
+</html>
