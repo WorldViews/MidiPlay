@@ -1,8 +1,7 @@
 
 "use strict";
 
-class CursorGraphic extends CanvasTool.Graphic
-{
+class CursorGraphic extends CanvasTool.Graphic {
   constructor(opts, mtool) {
     super(opts);
     this.mtool = mtool;
@@ -20,6 +19,47 @@ class CursorGraphic extends CanvasTool.Graphic
     this.drawCircle(canvas, ctx, 3, this.x, this.y);
   }
 }
+
+class BorderGraphic extends CanvasTool.Graphic {
+  constructor(opts, mtool) {
+    super(opts);
+    this.mtool = mtool;
+    this.lineWidth = 6;
+    this.strokeStyle = 'black';
+  }
+
+  draw(canvas, ctx) {
+    //console.log("cursor draw");
+    //super.draw(canvas, ctx);
+    var colors = [
+      "white",
+      "white",
+      "black",
+      "white",
+      "black",
+      "white",
+      "black",
+      "white",
+      "white",
+      "black",
+      "white",
+      "black"];
+    var wid = 300;
+    var x0 = - wid / 2;
+    var keywd = 6;
+    var keyht = 20;
+    var y = this.y;
+    var nnotes = 120;
+    for (var i = 0; i < nnotes; i++) {
+      var x = x0 + i * keywd;
+      var j = i % 12;
+      this.strokeStyle = colors[j];
+      //this.strokeStyle = (i % 2 == 0 ? "white" : "black");
+      this.drawLine(canvas, ctx, x, y, x, y + keyht)
+    }
+  }
+}
+
 
 class MusicTool extends CanvasTool {
   constructor(name, opts, synth) {
@@ -39,9 +79,15 @@ class MusicTool extends CanvasTool {
     this.initGUI();
     this.lockZoom = true;
     this.lockPan = true;
-    this.addPiano();
-    this.cursor = new CursorGraphic({id: 'cursor',
-                    x:0, y:0, width:100, height:100});
+    //this.addPiano();
+    var border = new BorderGraphic({ id: 'top', x: 0, y: 200 }, this);
+    this.addGraphic(border);
+    var border = new BorderGraphic({ id: 'bottom', x: 0, y: -200 }, this);
+    this.addGraphic(border);
+    this.cursor = new CursorGraphic({
+      id: 'cursor',
+      x: 0, y: 0, width: 100, height: 100
+    });
     this.addGraphic(this.cursor)
   }
 
@@ -93,14 +139,9 @@ class MusicTool extends CanvasTool {
   tick() {
     super.tick();
     //console.log("MusicTool.tick");
-    if (this.taikoBox)
-      this.taikoBox.tick();
-    if (this.wheelBox)
-      this.wheelBox.tick();
-    if (this.game)
-      this.game.tick();
   }
 
+  /*
   async addItem(item) {
     console.log("addItem", item);
     item.gtool = this;
@@ -116,11 +157,20 @@ class MusicTool extends CanvasTool {
       this.addGraphic(obj);
     }
   }
-
-  draw() {
-    super.draw();
-    this.drawL
-  }
+  */
+  /*
+    draw() {
+      super.draw();
+      var ctx = this.ctx;
+      this.setTransform(ctx);
+      var canvas = this.canvas;
+      this.drawBoarder(ctx, canvas, 0, 100);
+    }
+  
+    drawBoarder(ctx, canvas) {
+  
+    }
+  */
 
   handleMouseDrag(e) {
     super.handleMouseDrag(e);
@@ -130,7 +180,7 @@ class MusicTool extends CanvasTool {
     var y = pt.y;
     this.cursor.x = x;
     this.cursor.y = y;
-    var note = Math.floor(80 + x/10);
+    var note = Math.floor(80 + x / 10);
     console.log("kx", note);
     if (note != this.note) {
       console.log("note", note);
