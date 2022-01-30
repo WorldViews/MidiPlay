@@ -78,17 +78,24 @@ class BorderGraphic extends CanvasTool.Graphic {
     super(opts);
     this.mtool = mtool;
     this.lineWidth = 6;
-    this.keyHt = opts.keyHt || 20;
+    this.keyHt = opts.keyHt || 40;
     this.strokeStyle = 'black';
   }
 
   draw(canvas, ctx) {
     //console.log("cursor draw");
     //super.draw(canvas, ctx);
+    var keyWd = this.keyHt;
+    console.log("draw keyWd", keyWd, -this.mtool.padHeight);
+    this.drawHorizontalBorder(canvas, ctx, this.mtool.padHeight/2-this.keyHt);
+    this.drawHorizontalBorder(canvas, ctx, -this.mtool.padHeight/2);
+    this.drawVerticalBorder(canvas, ctx, -this.mtool.padWidth/2);
+    this.drawVerticalBorder(canvas, ctx, this.mtool.padWidth/2 - keyWd);
+  }
 
+  drawHorizontalBorder(canvas, ctx, y) {
     var nnotes = this.mtool.numNotes;
     var keyHt = this.keyHt;
-    var y = this.y;
 
     for (var i = 0; i < nnotes; i++) {
       var n = this.mtool.noteLow + i;
@@ -96,6 +103,19 @@ class BorderGraphic extends CanvasTool.Graphic {
       var j = n % 12;
       this.strokeStyle = COLORS[j];
       this.drawLine(canvas, ctx, x, y, x, y + keyHt);
+    }
+  }
+  
+  drawVerticalBorder(canvas, ctx, x) {
+    var nnotes = this.mtool.numNotes;
+    var keyWd = this.keyHt;
+
+    for (var i = 0; i < nnotes; i++) {
+      var n = this.mtool.noteLow + i;
+      var y = this.mtool.midiNoteToX(n);
+      var j = n % 12;
+      this.strokeStyle = COLORS[j];
+      this.drawLine(canvas, ctx, x, y, x+keyWd, y);
     }
   }
 }
@@ -122,9 +142,8 @@ class MusicTool extends CanvasTool {
     this.dxPerNote = this.padWidth / this.numNotes;
     this.setView(0, 0, this.padWidth, this.padHeight);
     var keyHt = 40;
-    var border = new BorderGraphic({id: 'top', x: 0, y: 400-keyHt, keyHt }, this);
-    this.addGraphic(border);
-    var border = new BorderGraphic({id: 'bottom', x: 0, y: -400, keyHt }, this);
+    var border = new BorderGraphic({id: 'border', x: 0, y: this.padHeight/2-keyHt, keyHt }, this);
+    var border = new BorderGraphic({id: 'border', keyHt }, this);
     this.addGraphic(border);
     this.pluck = new Pluck({id: 'pluck'}, this);
     this.addGraphic(this.pluck)
