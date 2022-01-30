@@ -23,6 +23,7 @@
     <script src="js/PianoBox.js"></script>
     <script>
         function playNote(n) {
+            console.log("****** don't use this");
             ts.synth.noteOn(0, n, 50, 0);
         }
         var ts = new TinySynth();
@@ -48,7 +49,10 @@
     <button onclick="run()">Run</button> &nbsp;&nbsp;
     <button onclick="stop()">Stop</button>
     <select id="prog" onchange="ts.SetProgram(this.selectedIndex)"></select>
-    <div id="noteStatus">&nbsp</div>
+    <div> &nbsp;
+        <span id="xnoteStatus"></span>
+        <span id="ynoteStatus"></span>
+    </div>
     <canvas id="musicCanvas"></canvas>
     <br>
     <span id="canvasStat"></span>

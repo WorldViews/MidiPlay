@@ -16,63 +16,93 @@ var COLORS = [
   "black"
 ];
 
+/*
+This is an object that gets dragged around the pad
+and when x or y values hit new note positions, plays
+the notes.
+*/
 class Pluck extends CanvasTool.Graphic {
   constructor(opts, mtool) {
     super(opts);
     this.mtool = mtool;
     this.lineWidth = 1;
     this.strokeStyle = 'black';
-    this.note = null;
-    this.intervals = [0, 12];
+    this.xnote = null;
+    //this.xintervals = [-12, 0, 12];
+    this.xintervals = [-4, 8];
+    this.yintervals = [-6, 6];
   }
 
   setXY(x,y) {
     this.x = x;
     this.y = y;
-    var note = this.mtool.xToMidiNote(x);
-    console.log("kx", note);
-    if (note != this.note) {
-      console.log("note", note);
-      this.handleNotes(note);
+    var xnote = this.mtool.xToMidiNote(x);
+    if (xnote != this.xnote) {
+      var nstr = this.handleNotes(xnote, this.xintervals);
+      $("#xnoteStatus").html("xnotes: "+nstr);
     }
-    this.note = note;
+    this.xnote = xnote;
+    var ynote = this.mtool.yToMidiNote(y);
+    if (ynote != this.ynote) {
+      var nstr = this.handleNotes(ynote, this.yintervals);
+      $("#ynoteStatus").html("ynotes: "+nstr);
+    }
+    this.ynote = ynote;
   }
 
-  handleNotes(n) {
-    console.log("handleNotes", n);
+  // play notes at the specified intervals from
+  // the note position n.
+  handleNotes(n, intervals) {
+    //console.log("handleNotes", n);
     var color = COLORS[n % 12];
-    if (color == "black")
-      return;
+    //if (color == "black")
+    //  return "";
     var nstr = "";
-    for (var k=0; k<this.intervals.length; k++) {
-      var i = this.intervals[k];
+    for (var k=0; k<intervals.length; k++) {
+      var i = intervals[k];
       var note = n + i;
+      if (COLORS[note % 12] == "black")
+        continue;
       this.mtool.synth.noteOn(0, note, 50, 0);
       //playNote(note);
       nstr += (note + " ");
     }
-    $("#noteStatus").html(nstr);
+    return nstr;
   }
 
   draw(canvas, ctx) {
     //console.log("cursor draw");
     var inst = this;
     super.draw(canvas, ctx);
-    this.drawCircle(canvas, ctx, 3, this.x, this.y);
-    this.drawLine(canvas, ctx, -1000, this.y, 1000, this.y);
-    this.intervals.forEach(iv => {
+    this.drawCircle(canvas, ctx, 5, this.x, this.y);
+    this.xintervals.forEach(iv => {
       var x = this.x + iv*this.mtool.dxPerNote;
       this.drawVerticalLine(canvas, ctx, x);
+    })
+    //console.log("yintervals", this.yintervals);
+    this.yintervals.forEach(iv => {
+      var y = this.y + iv*this.mtool.dyPerNote;
+      //console.log("  iv:", iv, "  y:", y);
+      this.drawHorizontalLine(canvas, ctx, y);
     })
   }
 
   drawVerticalLine(canvas, ctx, x) {
-    var y = this.y;
     this.drawLine(canvas, ctx, x, -1000, x, 1000);
     this.drawCircle(canvas, ctx, 3, x, this.y);
   }
+
+  drawHorizontalLine(canvas, ctx, y) {
+    this.drawLine(canvas, ctx, -1000, y, 1000, y);
+    this.drawCircle(canvas, ctx, 3, this.x, y);
+  }
 }
 
+
+// This just draws the border around the pad
+// It is roughly like piano keys but the spacing
+// is a bit different, since each halfnote gets
+// the same spacing.
 class BorderGraphic extends CanvasTool.Graphic {
   constructor(opts, mtool) {
     super(opts);
@@ -86,11 +116,22 @@ class BorderGraphic extends CanvasTool.Graphic {
     //console.log("cursor draw");
     //super.draw(canvas, ctx);
     var keyWd = this.keyHt;
-    console.log("draw keyWd", keyWd, -this.mtool.padHeight);
-    this.drawHorizontalBorder(canvas, ctx, this.mtool.padHeight/2-this.keyHt);
-    this.drawHorizontalBorder(canvas, ctx, -this.mtool.padHeight/2);
-    this.drawVerticalBorder(canvas, ctx, -this.mtool.padWidth/2);
-    this.drawVerticalBorder(canvas, ctx, this.mtool.padWidth/2 - keyWd);
+    var keyHt = this.keyHt;
+    var x0 = - this.mtool.padWidth/2;
+    var x1 = this.mtool.padWidth/2;
+    var y0 = this.mtool.padHeight/2;
+    var y1 = -this.mtool.padHeight/2;
+    //console.log("draw keyWd", keyWd, -this.mtool.padHeight);
+    this.lineWidth = 6;
+    this.drawHorizontalBorder(canvas, ctx, y0-this.keyHt);
+    this.drawHorizontalBorder(canvas, ctx, y1);
+    this.drawVerticalBorder(canvas,   ctx, x0);
+    this.drawVerticalBorder(canvas,   ctx, x1 - keyWd);
+    this.lineWidth = 1;
+    this.drawRect(canvas, ctx, x0+keyHt/2, y0-keyHt/2, keyHt, this.keyHt);
+    this.drawRect(canvas, ctx, x0+keyHt/2, y1+keyHt/2, keyHt, this.keyHt);
+    this.drawRect(canvas, ctx, x1-keyHt/2, y0-keyHt/2, keyHt, this.keyHt);
+    this.drawRect(canvas, ctx, x1-keyHt/2, y1+keyHt/2, keyHt, this.keyHt);
   }
 
   drawHorizontalBorder(canvas, ctx, y) {
@@ -140,6 +181,7 @@ class MusicTool extends CanvasTool {
     this.padWidth = 800;
     this.padHeight = 800;
     this.dxPerNote = this.padWidth / this.numNotes;
+    this.dyPerNote = this.padHeight / this.numNotes;
     this.setView(0, 0, this.padWidth, this.padHeight);
     var keyHt = 40;
     var border = new BorderGraphic({id: 'border', x: 0, y: this.padHeight/2-keyHt, keyHt }, this);
@@ -151,19 +193,16 @@ class MusicTool extends CanvasTool {
 
   xToMidiNote(x) {
     var x0 = - this.padWidth / 2;
-    var n = this.noteLow + Math.floor((x - x0)/this.dxPerNote + 0.5);
-    return n;
+    return this.noteLow + Math.floor((x - x0)/this.dxPerNote + 0.5);
   }
 
   midiNoteToX(n) {
     var x0 = - this.padWidth / 2;
-    var x = x0 + (n - this.noteLow) * this.dxPerNote;
-    return x;
+    return x0 + (n - this.noteLow) * this.dxPerNote;
   }
 
-  clear() {
-    super.clear();
-  }
+  yToMidiNote(y) { return this.xToMidiNote(y); }
+  midiNoteToY(n) { return this.midiNoteToX(y); }
 
   initGUI() {
     var inst = this;
@@ -194,71 +233,17 @@ class MusicTool extends CanvasTool {
     //console.log("MusicTool.tick");
   }
 
-  /*
-  async addItem(item) {
-    console.log("addItem", item);
-    item.gtool = this;
-    var otype = item.type;
-    var obj = await createObject(item);
-    console.log("addItem got", obj);
-    if (obj == null) {
-      console.log("Couldn't create", item);
-      return;
-    }
-    if (obj instanceof CanvasTool.Graphic) {
-      console.log("obj is graphic");
-      this.addGraphic(obj);
-    }
-  }
-  */
-
   handleMouseDrag(e) {
     super.handleMouseDrag(e);
     var pt = this.getMousePos(e);
     //console.log("drag", pt);
     this.pluck.setXY(pt.x, pt.y);
-    /*
-    var x = pt.x;
-    var y = pt.y;
-    this.pluck.x = x;
-    this.pluck.y = y;
-    //var note = Math.floor(80 + x / 10);
-    var note = this.xToMidiNote(x);
-    console.log("kx", note);
-    if (note != this.note) {
-      console.log("note", note);
-      playNote(note);
-    }
-    this.note = note;
-    */
   }
-
-/*
-  handleMouseDrag(e) {
-    super.handleMouseDrag(e);
-    var pt = this.getMousePos(e);
-    //console.log("drag", pt);
-    var x = pt.x;
-    var y = pt.y;
-    this.pluck.x = x;
-    this.pluck.y = y;
-    //var note = Math.floor(80 + x / 10);
-    var note = this.xToMidiNote(x);
-    console.log("kx", note);
-    if (note != this.note) {
-      console.log("note", note);
-      playNote(note);
-    }
-    this.note = note;
-  }
-*/
 
   handleMouseDown(e) {
     if (e.which != 1)
       return;
-    var x = e.clientX;
-    var y = e.clientY;
-    var pt = this.getMousePos(e);
+    this.handleMouseDrag(e);
   }
 
   handleDrop(e) {
