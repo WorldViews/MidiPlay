@@ -6,9 +6,10 @@
 
     <style>
         #musicCanvas {
-            width: 100%;
+            width: 600px;
+            height: 600px;
             xheight: 93%;
-            background: #f1dcba;
+            background: #9ad2ec;
         }
     </style>
     <script src="./js/libs/tinysynth/webaudio-tinysynth.js"></script>
@@ -29,9 +30,9 @@
         //var ts = synth;
         window.onload = () => {
             ts.Init();
-            mtool = new MusicTool("musicCanvas");
+            mtool = new MusicTool("musicCanvas", ts);
             mtool.start();
-            mtool.setView(0, 0, 1020);
+            mtool.setView(0, 0, 800, 800);
             //window.wheel = gtool.addWheel(SIMPLE1);
             //window.game = mtool.addGame({ songs: SONGS, initialSong: SIMPLE1 });
             // window.GAME = window.game;
@@ -47,8 +48,9 @@
     <button onclick="run()">Run</button> &nbsp;&nbsp;
     <button onclick="stop()">Stop</button>
     <select id="prog" onchange="ts.SetProgram(this.selectedIndex)"></select>
-    <div>xxx</div>
+    <div id="noteStatus">&nbsp</div>
     <canvas id="musicCanvas"></canvas>
+    <br>
     <span id="canvasStat"></span>
 </body>
 
