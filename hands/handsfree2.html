@@ -1,0 +1,103 @@
+<head>
+    <!-- Include Handsfree.js -->
+    <link rel="stylesheet" href="https://unpkg.com/handsfree@8.5.1/build/lib/assets/handsfree.css" />
+    <script src="../js/libs/jquery-3.1.0.min.js"></script>
+    <script src="../js/libs/sprintf.js"></script>
+    <script src="https://unpkg.com/handsfree@8.5.1/build/lib/handsfree.js"></script>
+</head>
+
+<body>
+    <!-- Your code must be inside body as it applies classes to it -->
+    <div>
+        My DIV
+        <pre id="hand0">
+            left
+        </pre>
+        <pre id="hand1">
+            right
+        </pre>
+    </div>
+    <script>
+        var DATA = null;
+        var DEBUG = 0;
+
+        function showHand(hands, i, name) {
+            str = "";
+            if (hands.landmarksVisible[i]) {
+                var v = hands.landmarks[i];
+                    //var str = i+" good  v:" + JSON.stringify(v);
+                    var pos = v[2];
+                    var x,y,z;
+                    ({x,y,z} = pos);
+                    //str = i + " good " + JSON.stringify(pos);
+                    ps = hands.pinchState[i];
+                    var pstr = ps[0];
+                    str = sprintf("%d good %8.4f %8.4f %8.4f   %s", i, x, y, z, pstr);
+                    var ps = "";
+                    str += JSON.stringify(ps);
+             }
+            else {
+                str = i + " bad";
+            }
+            $("#"+name).html(str);
+        }
+
+        function show(data) {
+            if (!data || !data.hands)
+                return;
+            var hands = data.hands;
+            showHand(hands, 0, "hand0");
+            showHand(hands, 1, "hand1");
+        }
+
+        function showXXX(data) {
+            if (!data || !data.hands)
+                return;
+            var hands = data.hands;
+            var lv = hands.landmarksVisible;
+            var str = "";
+            for (var i = 0; i < 4; i++) {
+                if (lv[i]) {
+                    var v = hands.landmarks[i];
+                    var pos = v[2];
+                    var x,y,z;
+                    ({x,y,z} = pos);
+                    str = sprintf(" good %d %8.4f %8.4f %8.4f    ", i, x, y, z);
+                   //console.log("good", lv[1]);
+                    // console.log(hands.landmarks[1]);
+                }
+            }
+            $("#debug").html(str);
+        }
+        // Let's use handtracking and show the webcam feed with wireframes
+        const handsfree = new Handsfree({ showDebug: true, hands: true })
+        handsfree.start()
+
+        // Create a plugin named "logger" to show data on every frame
+        handsfree.use('logger', data => {
+            if (DATA == null)
+                DATA = data;
+            show(data);
+            //console.log(data.hands)
+            //console.log(data.hands.pinchState)
+            var hands = data.hands;
+            if (!hands)
+                return;
+            var lv = hands.landmarksVisible;
+            if (lv[1]) {
+                console.log("good", lv[1]);
+                console.log(hands.landmarks[1]);
+            }
+            var ps = hands.pinchState;
+            if (!ps)
+                return;
+            if (DEBUG == 0)
+                return;
+            console.log("ps:" + ps);
+            var v = ps[0];
+            if (v == 'held') {
+                console.log("v: " + v);
+            }
+        })
+    </script>
+</body>
